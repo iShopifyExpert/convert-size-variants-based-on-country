@@ -1,0 +1,47 @@
+// Add this at the bottom of this file
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sizeLabels = document.querySelectorAll('.variant-wrapper fieldset.variant-input-wrap[name="Size"] .variant-input label');
+  if (sizeLabels) {
+    const sizeSelector = document.createElement('div');
+    sizeSelector.className = 'size-selector';
+    sizeLabels.forEach(label => label.dataset.originalSizes = label.innerText);
+    ['UK', 'EU', 'US'].forEach(size => {
+        const span = document.createElement('span');
+        Object.assign(span.style, {
+            cursor: 'pointer', color: '#000', padding: '2px 15px', margin: '0 4px 12px', fontSize: '13px',
+            display: 'inline-block', backgroundColor: '#f8f8f8', boxShadow: '0 0 0 1px #e8e8e1'
+        });
+        span.textContent = size;
+        span.setAttribute('value', size);
+        if (size === 'UK') {
+            Object.assign(span.style, { backgroundColor: '#000', color: '#fff' });
+            span.setAttribute('selected', 'true');
+        }
+        span.addEventListener('click', () => updateLabelSizes(size, span));
+        sizeSelector.appendChild(span);
+    });
+    document.querySelector('fieldset.variant-input-wrap').prepend(sizeSelector);
+    updateLabelSizes('UK', document.querySelector('.size-selector span[value="UK"]'));
+
+    function updateLabelSizes(selectedSize, selectedSpan) {
+        document.querySelectorAll('.size-selector span').forEach(s => {
+            Object.assign(s.style, { backgroundColor: '#f8f8f8', boxShadow: '0 0 0 1px #e8e8e1', color: '#000' });
+            s.removeAttribute('selected');
+        });
+        Object.assign(selectedSpan.style, { backgroundColor: '#000', boxShadow: '0 0 0 2px #000', color: '#fff' });
+        selectedSpan.setAttribute('selected', 'true');
+        sizeLabels.forEach(label => {
+            const originalSizes = label.dataset.originalSizes;
+            const sizes = originalSizes.match(/UK (\d+) \| EU (\d+) \| US (\d+)/);
+            if (sizes) {
+                const newSize = sizes[['UK', 'EU', 'US'].indexOf(selectedSize) + 1];
+                label.innerText = newSize;
+            } else {
+                console.error('Size format does not match expected pattern [UK 3 | EU 36 | US 2]', label);
+            }
+        });
+    }
+  }
+});
+</script>
