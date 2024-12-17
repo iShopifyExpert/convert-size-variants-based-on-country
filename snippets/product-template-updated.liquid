@@ -1,0 +1,69 @@
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const labels = document.querySelectorAll(
+      '.template-product.template-name-footwear .variant-wrapper fieldset.variant-input-wrap[name="Size"] .variant-input label'
+    );
+
+    if (labels) {
+      const sizeSelector = document.createElement('div');
+      sizeSelector.className = 'size-selector';
+
+      // Save original sizes
+      labels.forEach(label => (label.dataset.originalSizes = label.innerText));
+
+      const sizeFormats = ['UK', 'EU', 'US'];
+
+      sizeFormats.forEach(format => {
+        const span = document.createElement('span');
+        span.textContent = format;
+        span.setAttribute('value', format);
+        span.classList.add('size-option');
+        if (format === 'UK') span.classList.add('selected');
+
+        span.addEventListener('click', () => updateSizeFormat(format, span));
+        sizeSelector.appendChild(span);
+      });
+
+      document
+        .querySelector('.template-product.template-name-footwear .variant-wrapper fieldset.variant-input-wrap')
+        .prepend(sizeSelector);
+
+      function updateSizeFormat(format, selectedSpan) {
+        document.querySelectorAll('.size-selector span').forEach(el => el.classList.remove('selected'));
+        selectedSpan.classList.add('selected');
+
+        labels.forEach(label => {
+          // Updated regex to support sizes with decimals
+          const match = label.dataset.originalSizes.match(/UK (\d+(\.\d+)?) \| EU (\d+(\.\d+)?) \| US (\d+(\.\d+)?)/);
+          if (match) {
+            const size = match[sizeFormats.indexOf(format) * 2 + 1]; // Adjusted index calculation
+            label.innerText = size || 'N/A'; // Provide fallback for missing matches
+          } else {
+            console.warn('Unexpected size format:', label);
+          }
+        });
+      }
+
+      // Initialize default view
+      updateSizeFormat('UK', document.querySelector('.size-selector span[value="UK"]'));
+    }
+  });
+</script>
+
+<style>
+  .size-selector span {
+    cursor: pointer;
+    color: #000;
+    padding: 2px 15px;
+    margin: 0 4px 12px;
+    font-size: 13px;
+    display: inline-block;
+    background-color: #f8f8f8;
+    box-shadow: 0 0 0 1px #e8e8e1;
+  }
+  .size-selector span.selected {
+    background-color: #000;
+    color: #fff;
+    box-shadow: 0 0 0 2px #000;
+  }
+</style>
